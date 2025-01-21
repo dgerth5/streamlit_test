@@ -3,6 +3,7 @@ import numpy as np
 import random
 import streamlit as st
 
+@st.cache_data
 def generate_data():
     # Generate first dataset: Players
     positions = ["Pitcher", "Catcher", "Infielder", "Outfielder"]
