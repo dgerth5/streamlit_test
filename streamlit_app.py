@@ -38,38 +38,83 @@ def generate_data():
 
     return players_df, contracts_df
 
+def calculate_similarity(players_df, position, draft_year, region, same_region, more_than_5, more_than_3):
+    agent_scores = {agent: 0 for agent in players_df["AgentName"].unique()}
+
+    for agent in agent_scores:
+        # Check if agent is in the same region
+        if same_region:
+            if region in players_df[players_df["AgentName"] == agent]["Region"].values:
+                agent_scores[agent] += 1
+
+        # Check if agent has more than 5 players in the draft class
+        if more_than_5:
+            if len(players_df[(players_df["AgentName"] == agent) & (players_df["DraftYear"] == draft_year)]) > 5:
+                agent_scores[agent] += 1
+
+        # Check if agent has more than 3 players in the same position in the draft class
+        if more_than_3:
+            if len(players_df[(players_df["AgentName"] == agent) & (players_df["DraftYear"] == draft_year) & (players_df["Position"] == position)]) > 3:
+                agent_scores[agent] += 1
+
+    # Convert to DataFrame
+    scores_df = pd.DataFrame(agent_scores.items(), columns=["AgentName", "SimilarityScore"])
+    return scores_df.sort_values(by="SimilarityScore", ascending=False)
+
 def app():
     players_df, contracts_df = generate_data()
 
-    # Page 1: Agent Summary
-    st.title("Agent Summary")
+    # Sidebar navigation
+    page = st.sidebar.selectbox("Choose a page", ["Agent Summary", "Position Analysis", "Questionnaire"])
 
-    summary_df = (
-        contracts_df.groupby("AgentName")
-        .agg({"TotalSigned": "sum", "ExpectedSigned": "sum"})
-        .reset_index()
-    )
-    summary_df["Difference"] = summary_df["TotalSigned"] - summary_df["ExpectedSigned"]
+    if page == "Agent Summary":
+        st.title("Agent Summary")
 
-    st.dataframe(
-        summary_df.sort_values(by="TotalSigned", ascending=False),
-        use_container_width=True,
-    )
+        summary_df = (
+            contracts_df.groupby("AgentName")
+            .agg({"TotalSigned": "sum", "ExpectedSigned": "sum"})
+            .reset_index()
+        )
+        summary_df["Difference"] = summary_df["TotalSigned"] - summary_df["ExpectedSigned"]
 
-    # Page 2: Position and Draft Year Analysis
-    st.title("Position Analysis")
-    position = st.selectbox("Select Position:", players_df["Position"].unique())
+        st.dataframe(
+            summary_df.sort_values(by="TotalSigned", ascending=False),
+            use_container_width=True,
+        )
 
-    filtered_df = players_df[players_df["Position"] == position]
-    grouped = (
-        filtered_df.groupby(["AgentName", "DraftYear"])
-        .size()
-        .reset_index(name="Count")
-    )
+    elif page == "Position Analysis":
+        st.title("Position Analysis")
+        position = st.selectbox("Select Position:", players_df["Position"].unique())
 
-    st.bar_chart(
-        grouped.pivot(index="AgentName", columns="DraftYear", values="Count").fillna(0),
-    )
+        filtered_df = players_df[players_df["Position"] == position]
+        grouped = (
+            filtered_df.groupby(["AgentName", "DraftYear"])
+            .size()
+            .reset_index(name="Count")
+        )
+
+        st.bar_chart(
+            grouped.pivot(index="AgentName", columns="DraftYear", values="Count").fillna(0),
+        )
+
+    elif page == "Questionnaire":
+        st.title("Agent Questionnaire")
+
+        # User inputs
+        position = st.selectbox("Select your position:", players_df["Position"].unique())
+        draft_year = st.selectbox("Select your draft class:", sorted(players_df["DraftYear"].unique()))
+        region = st.selectbox("Select your region:", players_df["Region"].unique())
+
+        same_region = st.checkbox("Do you want an agent in the same region?")
+        more_than_5 = st.checkbox("Do you want an agent to have more than 5 players in your draft class?")
+        more_than_3 = st.checkbox("Do you want an agent to have more than 3 players at your position in your draft class?")
+
+        if st.button("Calculate Similarity Score"):
+            similarity_df = calculate_similarity(
+                players_df, position, draft_year, region, same_region, more_than_5, more_than_3
+            )
+            st.write("### Agent Similarity Scores")
+            st.dataframe(similarity_df, use_container_width=True)
 
 if __name__ == "__main__":
     app()
