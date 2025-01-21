@@ -1,5 +1,4 @@
 import pandas as pd
-import numpy as np
 import random
 import streamlit as st
 
@@ -86,7 +85,7 @@ def app():
 
     elif page == "Position Analysis":
         st.title("Position Analysis")
-        position = st.selectbox("Select Position:", players_df["Position"].unique())
+        position = st.selectbox("Select Position:", players_df["Position"].unique(), key="position_analysis")
 
         filtered_df = players_df[players_df["Position"] == position]
         grouped = (
@@ -103,15 +102,15 @@ def app():
         st.title("Agent Questionnaire")
 
         # User inputs
-        position = st.selectbox("Select your position:", players_df["Position"].unique(), key="position")
-        draft_year = st.selectbox("Select your draft class:", sorted(players_df["DraftYear"].unique()), key="draft_year")
-        region = st.selectbox("Select your region:", players_df["Region"].unique(), key="region")
+        position = st.selectbox("Select your position:", players_df["Position"].unique(), key="position_questionnaire")
+        draft_year = st.selectbox("Select your draft class:", sorted(players_df["DraftYear"].unique()), key="draft_year_questionnaire")
+        region = st.selectbox("Select your region:", players_df["Region"].unique(), key="region_questionnaire")
 
-        same_region = st.checkbox("Do you want an agent in the same region?", key="same_region")
-        more_than_5 = st.checkbox("Do you want an agent to have more than 5 players in your draft class?", key="more_than_5")
-        more_than_3 = st.checkbox("Do you want an agent to have more than 3 players at your position in your draft class?", key="more_than_3")
+        same_region = st.checkbox("Do you want an agent in the same region?", key="same_region_questionnaire")
+        more_than_5 = st.checkbox("Do you want an agent to have more than 5 players in your draft class?", key="more_than_5_questionnaire")
+        more_than_3 = st.checkbox("Do you want an agent to have more than 3 players at your position in your draft class?", key="more_than_3_questionnaire")
 
-        if st.button("Calculate Similarity Score", key="calculate_button"):
+        if st.button("Calculate Similarity Score", key="calculate_button_questionnaire"):
             similarity_df = calculate_similarity(
                 players_df, position, draft_year, region, same_region, more_than_5, more_than_3
             )
