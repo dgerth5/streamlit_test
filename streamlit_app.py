@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import random
 import streamlit as st
 
@@ -101,15 +102,15 @@ def app():
         st.title("Agent Questionnaire")
 
         # User inputs
-        position = st.selectbox("Select your position:", players_df["Position"].unique())
-        draft_year = st.selectbox("Select your draft class:", sorted(players_df["DraftYear"].unique()))
-        region = st.selectbox("Select your region:", players_df["Region"].unique())
+        position = st.selectbox("Select your position:", players_df["Position"].unique(), key="position")
+        draft_year = st.selectbox("Select your draft class:", sorted(players_df["DraftYear"].unique()), key="draft_year")
+        region = st.selectbox("Select your region:", players_df["Region"].unique(), key="region")
 
-        same_region = st.checkbox("Do you want an agent in the same region?")
-        more_than_5 = st.checkbox("Do you want an agent to have more than 5 players in your draft class?")
-        more_than_3 = st.checkbox("Do you want an agent to have more than 3 players at your position in your draft class?")
+        same_region = st.checkbox("Do you want an agent in the same region?", key="same_region")
+        more_than_5 = st.checkbox("Do you want an agent to have more than 5 players in your draft class?", key="more_than_5")
+        more_than_3 = st.checkbox("Do you want an agent to have more than 3 players at your position in your draft class?", key="more_than_3")
 
-        if st.button("Calculate Similarity Score"):
+        if st.button("Calculate Similarity Score", key="calculate_button"):
             similarity_df = calculate_similarity(
                 players_df, position, draft_year, region, same_region, more_than_5, more_than_3
             )
