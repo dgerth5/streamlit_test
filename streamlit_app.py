@@ -45,7 +45,8 @@ def calculate_similarity(players_df, position, draft_year, region, same_region, 
     for agent in agent_scores:
         # Check if agent is in the same region
         if same_region:
-            if region in players_df[players_df["AgentName"] == agent]["Region"].values:
+            agent_regions = players_df[players_df["AgentName"] == agent]["Region"].unique()
+            if region in agent_regions:
                 agent_scores[agent] += 1
 
         # Check if agent has more than 5 players in the draft class
