@@ -51,12 +51,14 @@ def calculate_similarity(players_df, position, draft_year, region, same_region, 
 
         # Check if agent has more than 5 players in the draft class
         if more_than_5:
-            if len(players_df[(players_df["AgentName"] == agent) & (players_df["DraftYear"] == draft_year)]) > 5:
+            draft_class_count = players_df[(players_df["AgentName"] == agent) & (players_df["DraftYear"] == draft_year)].shape[0]
+            if draft_class_count > 5:
                 agent_scores[agent] += 1
 
         # Check if agent has more than 3 players in the same position in the draft class
         if more_than_3:
-            if len(players_df[(players_df["AgentName"] == agent) & (players_df["DraftYear"] == draft_year) & (players_df["Position"] == position)]) > 3:
+            position_count = players_df[(players_df["AgentName"] == agent) & (players_df["DraftYear"] == draft_year) & (players_df["Position"] == position)].shape[0]
+            if position_count > 3:
                 agent_scores[agent] += 1
 
     # Convert to DataFrame
@@ -80,7 +82,7 @@ def app():
         summary_df["Difference"] = summary_df["TotalSigned"] - summary_df["ExpectedSigned"]
 
         st.dataframe(
-            summary_df.sort_values(by="TotalSigned", ascending=False),
+            summary_df,
             use_container_width=True,
         )
 
